@@ -33,7 +33,8 @@ pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFon
 def fix_arabic(text):
     if not text:
         return text
-    return get_display(arabic_reshaper.reshape(str(text)))
+    text_str = str(text).replace('\xa0', ' ').replace('\u202f', ' ').replace('\u200b', '')
+    return get_display(arabic_reshaper.reshape(text_str))
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
