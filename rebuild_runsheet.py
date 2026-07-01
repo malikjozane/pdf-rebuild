@@ -24,8 +24,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 import arabic_reshaper
 from bidi.algorithm import get_display
 
-# Register Arial Unicode MS for Arabic Support
-pdfmetrics.registerFont(TTFont('ArabicFont', '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'))
+# Register Arabic Font (bundled with the app)
+font_path = os.path.join(os.path.dirname(__file__), 'arial_unicode.ttf')
+pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
 pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFont', italic='ArabicFont', boldItalic='ArabicFont')
 
 def fix_arabic(text):
