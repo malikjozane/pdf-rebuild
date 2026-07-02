@@ -36,7 +36,15 @@ def fix_arabic(text):
     if not text:
         return text
     text_str = str(text).replace('\xa0', ' ').replace('\u202f', ' ').replace('\u200b', '')
-    return get_display(arabic_reshaper.reshape(text_str))
+    bidi_text = get_display(arabic_reshaper.reshape(text_str))
+    
+    # Escape XML so ReportLab doesn't crash on <, >, &
+    bidi_text = bidi_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    
+    # Replace all spaces with Helvetica spaces to prevent missing-glyph rectangles
+    bidi_text = bidi_text.replace(' ', '<font name="Helvetica"> </font>')
+    
+    return bidi_text
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
