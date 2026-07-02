@@ -26,8 +26,8 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # Register Arabic Font (bundled with the app)
-font_path = os.path.join(os.path.dirname(__file__), 'noto.ttf')
-font_bold_path = os.path.join(os.path.dirname(__file__), 'noto_bold.ttf')
+font_path = os.path.join(os.path.dirname(__file__), 'amiri.ttf')
+font_bold_path = os.path.join(os.path.dirname(__file__), 'amiri_bold.ttf')
 pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
 pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_bold_path))
 pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFont-Bold', italic='ArabicFont', boldItalic='ArabicFont-Bold')
