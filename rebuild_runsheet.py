@@ -26,8 +26,8 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # Register Arabic Font (bundled with the app)
-font_path = os.path.join(os.path.dirname(__file__), 'amiri.ttf')
-font_bold_path = os.path.join(os.path.dirname(__file__), 'amiri_bold.ttf')
+font_path = os.path.join(os.path.dirname(__file__), 'noto.ttf')
+font_bold_path = os.path.join(os.path.dirname(__file__), 'noto_bold.ttf')
 pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
 pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_bold_path))
 pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFont-Bold', italic='ArabicFont', boldItalic='ArabicFont-Bold')
@@ -297,15 +297,15 @@ def build_pdf(src_doc, header, rows, output_path):
     styles = getSampleStyleSheet()
 
     def ps(name, **kw):
-        d = dict(parent=styles["Normal"], fontSize=8.0, leading=10.0,
+        d = dict(parent=styles["Normal"], fontSize=10.0, leading=12.5,
                  spaceAfter=0, spaceBefore=0)
         d.update(kw)
         return ParagraphStyle(name, **d)
 
-    tiny = ps("tny", fontSize=7.0, leading=9, fontName="ArabicFont")
-    tinyb = ps("tnyb", fontSize=7.0, leading=9, fontName="ArabicFont")
-    smb = ps("smb", fontSize=8.5, leading=10, alignment=TA_CENTER, fontName="ArabicFont")
-    chdr = ps("chdr", fontSize=7.5, alignment=TA_CENTER, fontName="ArabicFont")
+    tiny = ps("tny", fontSize=8.75, leading=11, fontName="ArabicFont")
+    tinyb = ps("tnyb", fontSize=8.75, leading=11, fontName="ArabicFont")
+    smb = ps("smb", fontSize=10.5, leading=12.5, alignment=TA_CENTER, fontName="ArabicFont")
+    chdr = ps("chdr", fontSize=9.5, alignment=TA_CENTER, fontName="ArabicFont")
 
     # Document setup (landscape A4 with small margins)
     MARGIN = 12
@@ -327,12 +327,12 @@ def build_pdf(src_doc, header, rows, output_path):
 
     title_parts = [
         Paragraph(f"<b>{fix_arabic(header['title'])}</b>",
-                  ps("t", fontSize=11, alignment=TA_CENTER,
-                     fontName="ArabicFont", leading=14))
+                  ps("t", fontSize=13.75, alignment=TA_CENTER,
+                     fontName="ArabicFont", leading=17))
     ]
     if header.get("subtitle"):
         title_parts.append(Paragraph(fix_arabic(header["subtitle"]),
-                                     ps("st", fontSize=9, alignment=TA_CENTER, fontName="ArabicFont", leading=11)))
+                                     ps("st", fontSize=11, alignment=TA_CENTER, fontName="ArabicFont", leading=13)))
     if header.get("hdr_barcode_xref"):
         hb = extract_image_bytes(src_doc, header["hdr_barcode_xref"])
         if hb:
@@ -418,7 +418,7 @@ def build_pdf(src_doc, header, rows, output_path):
             Paragraph(fix_arabic(row.get("num", "")),       smb),
             awb_cell,
             Paragraph(fix_arabic(consignee),                tiny),
-            "",                                  # Delivered checkbox (blank)
+            Paragraph("[   ]", chdr),                        # Delivered checkbox
             Paragraph(fix_arabic(row.get("status", "")),    tiny),
             Paragraph(fix_arabic(cod),                      tiny),
             Paragraph(fix_arabic(row.get("area", "")),      tiny),
