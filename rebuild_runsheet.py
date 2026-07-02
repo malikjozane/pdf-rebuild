@@ -35,7 +35,14 @@ pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFon
 def fix_arabic(text):
     if not text:
         return text
-    text_str = str(text).replace('\xa0', ' ').replace('\u202f', ' ').replace('\u200b', '')
+    text_str = str(text)
+    # Strip bidi control characters, zero-width characters, and replacements
+    # \u200b-\u200f, \u202a-\u202e, \u2066-\u2069, \ufeff, \ufffd
+    text_str = re.sub(r'[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\ufffd]', '', text_str)
+    
+    # Normalize all remaining whitespace (including NBSP, En/Em space, etc.) to standard \x20 space
+    text_str = re.sub(r'\s+', ' ', text_str)
+    
     bidi_text = get_display(arabic_reshaper.reshape(text_str))
     return bidi_text
 
