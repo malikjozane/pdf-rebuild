@@ -21,30 +21,26 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-import os
 import arabic_reshaper
 from bidi.algorithm import get_display
 
-# Register Arabic Font (bundled with the app)
-font_path = os.path.join(os.path.dirname(__file__), 'arial.ttf')
-font_bold_path = os.path.join(os.path.dirname(__file__), 'arial_bold.ttf')
-pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
-pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_bold_path))
+# Register Arial Unicode MS for Arabic Support
+import os as _os
+_font_dir = _os.path.dirname(_os.path.abspath(__file__))
+pdfmetrics.registerFont(TTFont('ArabicFont', _os.path.join(_font_dir, 'arial.ttf')))
+pdfmetrics.registerFont(TTFont('ArabicFont-Bold', _os.path.join(_font_dir, 'arial_bold.ttf')))
 pdfmetrics.registerFontFamily('ArabicFont', normal='ArabicFont', bold='ArabicFont-Bold', italic='ArabicFont', boldItalic='ArabicFont-Bold')
 
 def fix_arabic(text):
+    import re
     if not text:
         return text
     text_str = str(text)
-    # Strip bidi control characters, zero-width characters, and replacements
-    # \u200b-\u200f, \u202a-\u202e, \u2066-\u2069, \ufeff, \ufffd
+    # Strip all invisible/bidi control characters and unicode replacement char
     text_str = re.sub(r'[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff\ufffd]', '', text_str)
-    
-    # Normalize all remaining whitespace (including NBSP, En/Em space, etc.) to standard \x20 space
-    text_str = re.sub(r'\s+', ' ', text_str)
-    
-    bidi_text = get_display(arabic_reshaper.reshape(text_str))
-    return bidi_text
+    # Normalize all whitespace variants to standard space
+    text_str = re.sub(r'[ \t\xa0\u202f\u2009\u2008]+', ' ', text_str)
+    return get_display(arabic_reshaper.reshape(text_str))
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -305,15 +301,15 @@ def build_pdf(src_doc, header, rows, output_path):
     styles = getSampleStyleSheet()
 
     def ps(name, **kw):
-        d = dict(parent=styles["Normal"], fontSize=10.0, leading=12.5,
+        d = dict(parent=styles["Normal"], fontSize=6.5, leading=8.5,
                  spaceAfter=0, spaceBefore=0)
         d.update(kw)
         return ParagraphStyle(name, **d)
 
-    tiny = ps("tny", fontSize=8.75, leading=11, fontName="ArabicFont")
-    tinyb = ps("tnyb", fontSize=8.75, leading=11, fontName="ArabicFont")
-    smb = ps("smb", fontSize=10.5, leading=12.5, alignment=TA_CENTER, fontName="ArabicFont")
-    chdr = ps("chdr", fontSize=9.5, alignment=TA_CENTER, fontName="ArabicFont")
+    tiny = ps("tny", fontSize=8.75, leading=11, fontName="ArabicFont", splitLongWords=0, wordWrap='LTR')
+    tinyb = ps("tnyb", fontSize=8.75, leading=11, fontName="ArabicFont-Bold", splitLongWords=0, wordWrap='LTR')
+    smb = ps("smb", fontSize=10.5, leading=13, alignment=TA_CENTER, fontName="ArabicFont", splitLongWords=0, wordWrap='LTR')
+    chdr = ps("chdr", fontSize=9.5, alignment=TA_CENTER, fontName="ArabicFont", splitLongWords=0, wordWrap='LTR')
 
     # Document setup (landscape A4 with small margins)
     MARGIN = 12
@@ -426,7 +422,7 @@ def build_pdf(src_doc, header, rows, output_path):
             Paragraph(fix_arabic(row.get("num", "")),       smb),
             awb_cell,
             Paragraph(fix_arabic(consignee),                tiny),
-            Paragraph("[   ]", chdr),                        # Delivered checkbox
+            Paragraph("[ ]", ps("del", fontSize=9, alignment=TA_CENTER, fontName="ArabicFont")),
             Paragraph(fix_arabic(row.get("status", "")),    tiny),
             Paragraph(fix_arabic(cod),                      tiny),
             Paragraph(fix_arabic(row.get("area", "")),      tiny),
@@ -440,7 +436,7 @@ def build_pdf(src_doc, header, rows, output_path):
                      rowHeights=row_heights, repeatRows=1)
 
     ts = [
-        ('FONT', (0, 0), (-1, -1), 'ArabicFont', 5.8),
+        ('FONT', (0, 0), (-1, -1), 'ArabicFont', 8.75),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
